@@ -112,6 +112,11 @@ local templates = {
 	};
 }
 
+--[[
+ + displays welcome screen and logo
+ + @param _waitforuser waits for key press to continue
+ + @param _hidetext hides title, subtitle, and version
+]]
 local function welcome(_waitforuser, _hidetext)
 	local txt = {title = "V A L O R O S", sub = system.version, msg = "press any key ...", ver = os.version()}
 	local col = {back = colors.cyan, border = colors.blue, logo = colors.red, bands = colors.blue,
@@ -131,7 +136,7 @@ local function welcome(_waitforuser, _hidetext)
 	if not _hidetext then
 		-- version
 		shape.textbox(txt.ver, w - #txt.ver - 1, h, col.back, col.version)
-		
+
 		-- title and subtitle
 		term.setTextColor(col.title)
 		term.setCursorPos(math.ceil((w - #txt.title) / 2), 8)
@@ -158,10 +163,12 @@ local function welcome(_waitforuser, _hidetext)
 	end
 end
 
--- checks filesystem against custom template
--- recreates missing files and directories
--- @param _noregen skips file regen
--- @return missing paths
+--[[
+ + checks filesystem against custom template
+ + recreates missing files and directories
+ + @param _noregen skips file regen
+ + @return missing paths
+]]
 local function checkfs(_noregen)
 	local missing = {}
 	for file, lpath in pairs(templates[system.fs_template]) do
@@ -211,7 +218,13 @@ local function checkfs(_noregen)
 	return unpack(missing)
 end
 
-local function login()
+--[[
+ + displays welcome background w/o logo
+ + requests user/pass to continue
+ + can use arrow keys to cycle through users
+ + @param _showusers blocks arrow key cycling
+]]
+local function login(_hideusers)
 	local txt = {title = "SELECT A USER", user = "USER:", pass = "PASS:",
 				 msg = "switch users with up and down", wrong = "Invalid user or pass."}
 	local num = {boxsize = 17, userheight = 8, passheight = 12}
@@ -234,8 +247,10 @@ local function login()
 	-- text
 	shape.textbox(txt.title, math.ceil((w - #txt.title) / 2), num.userheight - 2, col.back, col.title)
 	shape.textbox(txt.user, math.floor((w - num.boxsize - #txt.user - 1) / 2), num.userheight, col.back, col.tags)
-	shape.textbox(txt.msg, math.ceil((w - #txt.msg) / 2), num.userheight + 1, col.back, col.msg)
 	shape.textbox(txt.pass, math.floor((w - num.boxsize - #txt.pass - 1) / 2), num.passheight, col.back, col.tags)
+	if not _hideusers then
+		shape.textbox(txt.msg, math.ceil((w - #txt.msg) / 2), num.userheight + 1, col.back, col.msg)
+	end
 
 	-- load users
 	local userlist = {}
@@ -258,11 +273,11 @@ local function login()
 		local pstart = math.ceil((w - num.boxsize + #txt.pass + 1) / 2)
 		shape.line(ustart, num.userheight, ustart + num.boxsize, num.userheight, col.input)
 		shape.line(pstart, num.passheight, pstart + num.boxsize, num.passheight, col.input)
-		
+
 		-- handle input
 		term.setTextColor(colors.black)
 		term.setCursorPos(ustart, num.userheight)
-		local uinput = read(nil, userlist, num.boxsize + 1)
+		local uinput = read(nil, _hideusers and {} or userlist, num.boxsize + 1)
 		if passlist[uinput] == "[null]" then
 			break
 		end
