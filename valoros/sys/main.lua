@@ -7,7 +7,7 @@ local function d(...)
 		elseif type(v) == "function" then
 			v = "[function]"
 		end
-		print("[DBG] ",type(v)," : '",v,"'")
+		print("[DBG] ", type(v), " : '", v, "'")
 		sleep(1.5)
 	end
 end
