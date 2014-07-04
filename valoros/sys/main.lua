@@ -1,5 +1,5 @@
 
--- debug function
+-- debug
 local function d(...)
 	for _, t in pairs({...}) do
 		local v = t
@@ -13,16 +13,15 @@ local function d(...)
 	end
 end
 
-system = {}
-
-local apidir = "valoros/api/"
-os.loadAPI(apidir.."config")
-os.loadAPI(apidir.."misc")
-os.loadAPI(apidir.."shape")
-
+-- load apis
+for _, file in pairs(fs.list("valoros/api/")) do
+	os.loadAPI("valoros/api/"..file)
+end
 read = misc.read
 
+-- setup system[]
 local w, h = term.getSize()
+system = {}
 system.back_color = colors.black
 system.display = term.isColor() and "color" or "basic"
 system.fs_template = "default"
@@ -31,7 +30,7 @@ system.text_color = colors.white
 system.version = "1.0"
 w, h = nil
 
--- redefine/create default functions
+-- redefine default functions
 assert = function(exp, msg, lvl)
   	lvl = tonumber(lvl) or 1
   	if not exp then
@@ -92,26 +91,6 @@ valExists = function(tab, val)
 		end
 	end
 end
-
-local templates = {
-	default = {
-		api = "valoros/api/";
-		api_conf = "valoros/api/config";
-		api_misc = "valoros/api/misc";
-		api_shape = "valoros/api/shape";
-		moved = "valoros/moved/";
-		prefix = "/";
-		prgm = "valoros/prgm/";
-		root = "valoros/";
-		sys = "valoros/sys/";
-		sys_conf = "valoros/sys/sys-config.conf";
-		sys_core = "valoros/sys/main.lua";
-		user = "valoros/user/";
-		user_root = "valoros/user/root/";
-		user_root_data = "valoros/user/root/user-data.conf";
-		user_root_files = "valoros/user/root/files/";
-	};
-}
 
 --[[
  + displays welcome screen and logo
@@ -252,6 +231,7 @@ local function login(_hideusers)
 	if not _hideusers then
 		shape.textbox(txt.msg, math.ceil((w - #txt.msg) / 2), num.userheight + 1, col.back, col.msg)
 	end
+
 	-- load users
 	local userlist = {}
 	local passlist = {}
