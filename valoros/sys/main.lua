@@ -1,17 +1,17 @@
 
 -- debug function
 local function d(...)
-	for _, v in pairs({...}) do
-		if type(v) == "table" then
-			v = textutils.serialize(v)
-		elseif type(v) == "function" then
+	for _, t in pairs({...}) do
+		local v = t
+		if type(t) == "table" then
+			v = textutils.serialize(t)
+		elseif type(t) == "function" then
 			v = "[function]"
 		end
-		print("[DBG] ", type(v), " : '", v, "'")
+		print("[DBG] ",type(t)," : '",v,"'")
 		sleep(1.5)
 	end
 end
-
 system = {}
 
 local apidir = "valoros/api/"
@@ -27,7 +27,7 @@ system.display = term.isColor() and "color" or "basic"
 system.fs_template = "default"
 system.terminal = {width = w, height = h}
 system.text_color = colors.white
-system.version = "ValorOS 1.0"
+system.version = "1.0"
 w, h = nil
 
 -- redefine/create default functions
@@ -79,9 +79,8 @@ clear = function()
 	term.setCursorPos(1, 1)
 end
 
-nVersion = os.version
-os.version = function()
-	return system.version
+getVersion = function()
+	return "ValorOS "..tostring(system.version)
 end
 
 valExists = function(tab, val)
@@ -114,12 +113,10 @@ local templates = {
 }
 
 local function welcome(_waitforuser, _hidetext)
-	local txt = {title = "V A L O R O S", msg = "press any key ..."}
+	local txt = {title = "V A L O R O S", sub = system.version, msg = "press any key ...", ver = os.version()}
 	local col = {back = colors.cyan, border = colors.blue, logo = colors.red, bands = colors.blue,
-				 title = colors.black, msg = colors.gray, version = colors.gray}
+				 title = colors.black, sub = colors.blue, msg = colors.gray, version = colors.gray}
 	local w, h = system.terminal.width, system.terminal.height
-	local pterm = term
-	local term = window.create(term.current(), 1, 1, w, h, true)
 
 	-- basic design
 	clear()
@@ -133,9 +130,9 @@ local function welcome(_waitforuser, _hidetext)
 
 	if not _hidetext then
 		-- version
-		shape.textbox(os.version(), w - #os.version(), h, col.back, col.version)
-
-		-- title
+		shape.textbox(txt.ver, w - #txt.ver - 1, h, col.back, col.version)
+		
+		-- title and subtitle
 		term.setTextColor(col.title)
 		term.setCursorPos(math.ceil((w - #txt.title) / 2), 8)
 		for n = 1, #txt.title do
@@ -150,6 +147,7 @@ local function welcome(_waitforuser, _hidetext)
 			term.write(c)
 			sleep(0.1)
 		end
+		shape.textbox(txt.sub, math.ceil((w - #txt.sub) / 2), 10, col.back, col.sub)
 	end
 
 	-- wait for input
