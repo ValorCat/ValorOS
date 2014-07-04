@@ -12,6 +12,7 @@ local function d(...)
 		sleep(1.5)
 	end
 end
+
 system = {}
 
 local apidir = "valoros/api/"
@@ -251,7 +252,6 @@ local function login(_hideusers)
 	if not _hideusers then
 		shape.textbox(txt.msg, math.ceil((w - #txt.msg) / 2), num.userheight + 1, col.back, col.msg)
 	end
-
 	-- load users
 	local userlist = {}
 	local passlist = {}
@@ -296,7 +296,92 @@ local function login(_hideusers)
 	clear()
 end
 
-welcome(true)
-checkfs()
-login()
-clear()
+--[[
+ + displays the blue screen of death
+ + draws the CraftOS shell below the error message
+ + shell size adapts to error length
+ + @param _error is displayed, defaults to custom message
+]]
+local function bsod(_error)
+	local txt = {title = "ValorOS has crashed!", null = "Unfortunately, the exact error could not be determined.",
+				 note = "Press any key to open the shell."}
+	local w, h = term.getSize()
+
+	term.setBackgroundColor(term.isColor() and colors.blue or colors.black)
+	term.setTextColor(colors.white)
+	term.clear()
+	
+	-- text
+	term.setCursorPos(math.ceil((w - #txt.title) / 2), 2)
+	write(txt.title)
+	
+	_error = tostring(_error)
+	term.setCursorPos(2, 4)
+	local len = 1
+	if not _error then
+		write(txt.null)
+	else
+		-- wrap error message
+		local msg = tostring(_error)
+		for i = 1, #msg do
+			local c = msg:sub(i, i)
+			local x, y = term.getCursorPos()
+			local w, h = term.getSize()
+			if x == 1 then
+				write(" ")
+				x = 2
+			end
+			if x < w then
+				if not ((c == " ") and (x <= 2)) then
+					write(c)
+					if c == "\n" then
+						write(" ")
+					end
+				end
+				if (c == "\n") and (x < w) then
+					len = len + 1
+				end
+			else
+				term.setCursorPos(2, y + 1)
+				len = len + 1
+			end
+		end
+	end
+	
+	if term.isColor() then
+		for row = len + 5, h do
+			paintutils.drawLine(1, row, w, row, colors.black)
+		end
+		term.setCursorPos(1, len + 5)
+		term.setTextColor(colors.yellow)
+		print(os.version())
+		term.setTextColor(colors.white)
+		return
+	else
+		term.setCursorPos(1, len + 5)
+		for i = 1, w do
+			write("-")
+		end
+		term.setCursorPos(1, len + 6)
+		print(os.version())
+		return
+	end
+end
+
+local ok, err = pcall(function()
+	clear()
+	welcome(true)
+	checkfs()
+	login()
+	clear()
+	bsod("This is an example error.")
+end)
+
+if not ok then
+	local find1 = err:find(":", 1, true)
+	local find2 = err:find(":", find1 + 1, true)
+	local file = err:sub(10, find1 - 3)
+	local line = err:sub(find1 + 1, find2 - 1)
+	local msg = err:sub(find2 + 1)
+	bsod(msg.."\nThe error occurred in "..(file or "an unknown file").." on line "..(line or "[?]")..".")
+end
