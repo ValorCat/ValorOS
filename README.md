@@ -12,7 +12,7 @@ Online Emulator >>> www.gravlann.github.io!
   - [x] Non-advanced version
 
 - [ ] Implement templates
-  - [ ] Create template reader
+  - [x] Create template reader
   - [ ] Create appropriate functions
   - [ ] Allow viewing from the desktop
   - [ ] Allow editing from the desktop
